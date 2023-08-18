@@ -70,13 +70,9 @@ export function createDeckOfCards(shuffleDeck: boolean = false): Card[] {
 
   for (let suit = 0; suit <= 3; suit++) {
     for (let value = ACE; value <= KING; value++) {
-      cards.push({ suit, value });
+      cards.push({ suit, value, faceUp: false });
     }
   }
 
-  if (shuffleDeck) {
-    shuffle(cards);
-  }
-
-  return cards;
+  return shuffleDeck ? shuffle(cards) : cards;
 }

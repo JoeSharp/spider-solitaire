@@ -18,7 +18,12 @@ function drawStack(p: p5, x: StackDraw, y: StackDraw, stack: CardStack) {
   if (stack.selected) {
     p.strokeWeight(5);
     p.stroke("gold");
-    p.rect(x.value, y.value, CARD_WIDTH, CARD_HEIGHT);
+    p.rect(
+      x.value,
+      y.value,
+      CARD_WIDTH,
+      CARD_HEIGHT + y.stagger * (stack.cards.length - 1)
+    );
   } else {
     p.strokeWeight(1);
     p.stroke("black");

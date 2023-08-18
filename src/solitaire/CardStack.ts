@@ -30,6 +30,10 @@ export class CardStack {
     this.cards = [];
   }
 
+  placeCards(cards: Card[]) {
+    cards.forEach((card) => this.placeCard(card, false));
+  }
+
   placeCard(card: Card, validate: boolean = true): boolean {
     if (validate && !this.canPlaceCard(card, this.peek())) {
       return false;
@@ -40,8 +44,25 @@ export class CardStack {
     return true;
   }
 
-  deal(): Card | undefined {
+  pop(): Card | undefined {
     return this.cards.pop();
+  }
+
+  popFaceUp(): Card[] {
+    const cards: Card[] = [];
+
+    while (this.cards.length > 0 && this.cards[this.cards.length - 1].faceUp) {
+      cards.push(this.cards.pop()!);
+    }
+
+    return cards;
+  }
+
+  turnOverTop() {
+    const topCard = this.peek();
+    if (!!topCard) {
+      topCard.faceUp = true;
+    }
   }
 
   peek(): Card | undefined {

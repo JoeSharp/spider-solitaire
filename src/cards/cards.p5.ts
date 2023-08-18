@@ -109,6 +109,9 @@ export function getCardHeight(cWidth: number) {
   return (cWidth / CARD_WIDTH) * CARD_HEIGHT;
 }
 
+const MARGIN_FRACTION = 0.1;
+const BODY_FRACTION = 1 - 2 * MARGIN_FRACTION;
+
 export function drawCard(
   s: p5,
   x: number,
@@ -126,30 +129,36 @@ export function drawCard(
   s.fill("white");
   s.rect(0, 0, cWidth, cHeight);
 
-  s.noStroke();
+  if (card.faceUp) {
+    s.noStroke();
 
-  s.fill(suitColour(s, card.suit));
-  s.textAlign(s.CENTER, s.CENTER);
+    s.fill(suitColour(s, card.suit));
+    s.textAlign(s.CENTER, s.CENTER);
 
-  if (card.value === ACE) {
-    s.textSize(cWidth / 2);
-    s.text(suitChar(card.suit), cWidth * 0.5, cHeight * 0.5);
-  } else if (isImageCard(card.value)) {
-    s.textSize(cWidth / 2);
-    s.text(valueText(card.value), cWidth * 0.5, cHeight * 0.5);
+    if (card.value === ACE) {
+      s.textSize(cWidth / 2);
+      s.text(suitChar(card.suit), cWidth * 0.5, cHeight * 0.5);
+    } else if (isImageCard(card.value)) {
+      s.textSize(cWidth / 2);
+      s.text(valueText(card.value), cWidth * 0.5, cHeight * 0.5);
+    } else {
+      s.textSize(cWidth / 6);
+      getValueCoords(card.value, cWidth, cHeight).forEach(({ x, y }) => {
+        s.text(suitChar(card.suit), x, y);
+      });
+    }
+
+    // Corners
+    s.textSize(cWidth / 8);
+    s.text(valueText(card.value), cWidth * 0.1, cHeight * 0.1);
+    s.text(suitChar(card.suit), cWidth * 0.1, cHeight * 0.2);
+    s.text(valueText(card.value), cWidth * 0.9, cHeight * 0.8);
+    s.text(suitChar(card.suit), cWidth * 0.9, cHeight * 0.9);
   } else {
-    s.textSize(cWidth / 6);
-    getValueCoords(card.value, cWidth, cHeight).forEach(({ x, y }) => {
-      s.text(suitChar(card.suit), x, y);
-    });
+    s.translate(cWidth * MARGIN_FRACTION, cHeight * MARGIN_FRACTION);
+    s.fill("blue");
+    s.rect(0, 0, cWidth * BODY_FRACTION, cHeight * BODY_FRACTION);
   }
-
-  // Corners
-  s.textSize(cWidth / 8);
-  s.text(valueText(card.value), cWidth * 0.1, cHeight * 0.1);
-  s.text(suitChar(card.suit), cWidth * 0.1, cHeight * 0.2);
-  s.text(valueText(card.value), cWidth * 0.9, cHeight * 0.8);
-  s.text(suitChar(card.suit), cWidth * 0.9, cHeight * 0.9);
 
   s.pop();
 }
