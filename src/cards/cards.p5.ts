@@ -1,47 +1,6 @@
 import * as p5 from "p5";
-import { ACE, JACK, QUEEN, KING, Card, Suit } from "./types";
-import { isImageCard } from "./cards";
-
-export function suitText(suit: Suit) {
-  switch (suit) {
-    case Suit.Hearts:
-      return "Hearts";
-    case Suit.Diamonds:
-      return "Diamonds";
-    case Suit.Spades:
-      return "Spades";
-    case Suit.Clubs:
-      return "Clubs";
-  }
-}
-
-export function valueText(value: number) {
-  switch (value) {
-    case ACE:
-      return "A";
-    case JACK:
-      return "J";
-    case QUEEN:
-      return "Q";
-    case KING:
-      return "K";
-    default:
-      return value.toString();
-  }
-}
-
-export function suitChar(suit: Suit) {
-  switch (suit) {
-    case Suit.Hearts:
-      return "♥︎";
-    case Suit.Diamonds:
-      return "♦︎";
-    case Suit.Spades:
-      return "♠︎";
-    case Suit.Clubs:
-      return "♣︎";
-  }
-}
+import { ACE, Card, Suit } from "./types";
+import { isImageCard, suitChar, valueText } from "./cards";
 
 function getValueCoords(value: number, cWidth: number, cHeight: number) {
   switch (value) {
@@ -144,15 +103,25 @@ export function suitColour(s: p5, suit: Suit) {
   }
 }
 
-function getCardHeight(cWidth: number) {
+export function getCardHeight(cWidth: number) {
   const CARD_WIDTH = 2.5;
   const CARD_HEIGHT = 3.5;
   return (cWidth / CARD_WIDTH) * CARD_HEIGHT;
 }
 
-export function drawCard(s: p5, card: Card, cWidth: number) {
+export function drawCard(
+  s: p5,
+  x: number,
+  y: number,
+  card: Card,
+  cWidth: number
+) {
   const cHeight = getCardHeight(cWidth);
 
+  s.push();
+  s.translate(x, y);
+
+  s.strokeWeight(1);
   s.stroke("black");
   s.fill("white");
   s.rect(0, 0, cWidth, cHeight);
@@ -181,4 +150,6 @@ export function drawCard(s: p5, card: Card, cWidth: number) {
   s.text(suitChar(card.suit), cWidth * 0.1, cHeight * 0.2);
   s.text(valueText(card.value), cWidth * 0.9, cHeight * 0.8);
   s.text(suitChar(card.suit), cWidth * 0.9, cHeight * 0.9);
+
+  s.pop();
 }

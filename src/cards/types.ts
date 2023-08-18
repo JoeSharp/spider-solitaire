@@ -1,3 +1,8 @@
+export enum SuitColor {
+  Red,
+  Black,
+}
+
 export enum Suit {
   Hearts,
   Diamonds,
