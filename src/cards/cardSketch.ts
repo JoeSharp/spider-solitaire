@@ -4,11 +4,10 @@ import { drawCard, getCardHeight } from "./cards.p5";
 import { Card } from "./types";
 
 const cardSketch = (p: p5) => {
-  let canvas;
   let deck: Card[] = [];
 
   p.setup = () => {
-    canvas = p.createCanvas(600, 600);
+    p.createCanvas(600, 600);
 
     deck = createDeckOfCards();
     p.shuffle(deck, true);
@@ -25,8 +24,7 @@ const cardSketch = (p: p5) => {
       const y = cHeight * Math.floor(i / 8);
 
       p.push();
-      p.translate(x, y);
-      drawCard(p, card, cWidth);
+      drawCard(p, x, y, card, cWidth);
       p.pop();
     });
   };

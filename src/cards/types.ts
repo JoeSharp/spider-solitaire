@@ -13,7 +13,7 @@ export enum Suit {
 export interface Card {
   suit: Suit;
   value: number;
-  faceUp: boolean;
+  faceUp?: boolean;
 }
 
 export const ACE = 1;
