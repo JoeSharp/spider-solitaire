@@ -2,7 +2,7 @@ import p5 from "p5";
 import { drawCard, getCardHeight } from "../cards/cards.p5";
 import Solitaire from "./Solitaire";
 import { CardStack } from "./CardStack";
-import { Dimensions, constrainToAspectRatio } from "../dimensions";
+import { Dimensions } from "../dimensions";
 
 interface GameDimensions {
   canvas: Dimensions;
@@ -145,12 +145,10 @@ const drawDeck = (
  */
 
 function getGameDimensions(): GameDimensions {
-  const canvas = constrainToAspectRatio(
-    window.screen.width,
-    window.screen.height,
-    60,
-    60
-  );
+  const canvas = {
+    width: window.screen.width,
+    height: window.screen.width,
+  };
   const margin = canvas.width / 60;
   const card: Dimensions = {
     width: margin * 6,
