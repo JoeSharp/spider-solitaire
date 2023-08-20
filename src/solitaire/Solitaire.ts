@@ -103,8 +103,19 @@ class Solitaire {
         StackType.IN_PLAY === this.selectedStackType &&
         stackType === StackType.IN_PLAY
       ) {
+        const destCard = stack.peek();
         const cards = this.selectedStack
-          .popThoseThatMatch((c) => this.isFaceUp(c))
+          .popThoseThatMatch((c) => {
+            if (!this.isFaceUp(c)) {
+              return false;
+            }
+
+            if (destCard === undefined) {
+              return true;
+            }
+
+            return c.value < destCard.value;
+          })
           .reverse();
 
         let placeFailed = false;
