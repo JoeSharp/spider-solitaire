@@ -2,6 +2,7 @@ import * as p5 from "p5";
 import { ACE, Suit } from "./types";
 import { isImageCard, suitChar, valueText } from "./cards";
 import Card from "./Card";
+import { Dimensions } from "../dimensions";
 
 function getValueCoords(value: number, cWidth: number, cHeight: number) {
   switch (value) {
@@ -104,14 +105,14 @@ export function suitColour(s: p5, suit: Suit) {
   }
 }
 
+const MARGIN_FRACTION = 0.1;
+const BODY_FRACTION = 1 - 2 * MARGIN_FRACTION;
+
 export function getCardHeight(cWidth: number) {
   const CARD_WIDTH = 2.5;
   const CARD_HEIGHT = 3.5;
   return (cWidth / CARD_WIDTH) * CARD_HEIGHT;
 }
-
-const MARGIN_FRACTION = 0.1;
-const BODY_FRACTION = 1 - 2 * MARGIN_FRACTION;
 
 export function drawCard(
   s: p5,
@@ -119,10 +120,8 @@ export function drawCard(
   y: number,
   card: Card,
   faceUp: boolean,
-  cWidth: number
+  { width: cWidth, height: cHeight }: Dimensions
 ) {
-  const cHeight = getCardHeight(cWidth);
-
   s.push();
   s.translate(x, y);
 

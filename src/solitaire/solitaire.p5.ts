@@ -2,12 +2,15 @@ import p5 from "p5";
 import { drawCard, getCardHeight } from "../cards/cards.p5";
 import Solitaire from "./Solitaire";
 import { CardStack } from "./CardStack";
+import { Dimensions, constrainToAspectRatio } from "../dimensions";
 
-const CARD_WIDTH = 70;
-const CARD_HEIGHT = getCardHeight(CARD_WIDTH);
-const MARGIN = 10;
-const IN_PLAY_STACK_Y = 2 * MARGIN + CARD_HEIGHT;
-const DECK_X = 5 * CARD_WIDTH + 6 * MARGIN;
+interface GameDimensions {
+  canvas: Dimensions;
+  card: Dimensions;
+  margin: number;
+  inPlayStackY: number;
+  deckX: number;
+}
 
 interface StackDraw {
   value: number;
@@ -16,6 +19,7 @@ interface StackDraw {
 
 function drawStack(
   p: p5,
+  dim: GameDimensions,
   x: StackDraw,
   y: StackDraw,
   stack: CardStack,
@@ -27,8 +31,8 @@ function drawStack(
     p.rect(
       x.value,
       y.value,
-      CARD_WIDTH,
-      CARD_HEIGHT + y.stagger * (stack.cards.length - 1)
+      dim.card.width,
+      dim.card.height + y.stagger * (stack.cards.length - 1)
     );
   } else {
     p.strokeWeight(1);
@@ -36,7 +40,7 @@ function drawStack(
   }
 
   if (stack.cards.length === 0) {
-    drawEmptySpace(p, x.value, y.value);
+    drawEmptySpace(p, dim, x.value, y.value);
   } else {
     stack.cards.forEach((card, i) => {
       drawCard(
@@ -45,19 +49,20 @@ function drawStack(
         y.value + i * y.stagger,
         card,
         faceUp.has(card.key),
-        CARD_WIDTH
+        dim.card
       );
     });
   }
 }
 
-function drawEmptySpace(p: p5, x: number, y: number) {
+function drawEmptySpace(p: p5, dim: GameDimensions, x: number, y: number) {
   p.noFill();
-  p.rect(x, y, CARD_WIDTH, CARD_HEIGHT);
+  p.rect(x, y, dim.card.width, dim.card.height);
 }
 
 const drawCompleteStacks = (
   p: p5,
+  dim: GameDimensions,
   x: number,
   y: number,
   { completeStacks, faceUp }: Solitaire
@@ -66,17 +71,19 @@ const drawCompleteStacks = (
   for (const [_suit, stack] of completeStacks) {
     drawStack(
       p,
+      dim,
       { value: cX, stagger: 0 },
       { value: y, stagger: 0 },
       stack,
       faceUp
     );
-    cX += CARD_WIDTH + MARGIN;
+    cX += dim.card.width + dim.margin;
   }
 };
 
 const drawInPlayStacks = (
   p: p5,
+  dim: GameDimensions,
   x: number,
   y: number,
   { inPlayStacks, faceUp }: Solitaire
@@ -84,8 +91,9 @@ const drawInPlayStacks = (
   for (const [i, stack] of inPlayStacks) {
     drawStack(
       p,
-      { value: x + i * (CARD_WIDTH + MARGIN), stagger: 0 },
-      { value: y, stagger: CARD_HEIGHT / 4 },
+      dim,
+      { value: x + i * (dim.card.width + dim.margin), stagger: 0 },
+      { value: y, stagger: 2 * dim.margin },
       stack,
       faceUp
     );
@@ -94,12 +102,14 @@ const drawInPlayStacks = (
 
 const drawDeck = (
   p: p5,
+  dim: GameDimensions,
   x: number,
   y: number,
   { availableCards, seenCards, faceUp }: Solitaire
 ) => {
   drawStack(
     p,
+    dim,
     { value: x, stagger: 0 },
     { value: y, stagger: 0 },
     seenCards,
@@ -107,18 +117,62 @@ const drawDeck = (
   );
   drawStack(
     p,
-    { value: x + CARD_WIDTH + MARGIN, stagger: 0 },
+    dim,
+    { value: x + dim.card.width + dim.margin, stagger: 0 },
     { value: y, stagger: 0 },
     availableCards,
     faceUp
   );
 };
 
+/**
+ * 7 cards across
+ * 8 margins
+ * cards should be 6 * margin wide
+ * 8m + 7*6m
+ * 8m + 52m = 60m across
+ *
+ * cardHeight = 2.5 / 1.5 * cardWidth = 10m
+ *
+ * longest stack = 6 hidden cards + 13 visible cards
+ * = (6 + 13) * 2 * margin + 1 card
+ * = 38m + 10m
+ * = 48m for longest stack
+ * + 1 card + 2 margins = 10m + 2m = 12m
+ * 48 + 12m = 60m; It's a square!
+ *
+ * @returns
+ */
+
+function getGameDimensions(): GameDimensions {
+  const canvas = constrainToAspectRatio(
+    window.screen.width,
+    window.screen.height,
+    60,
+    60
+  );
+  const margin = canvas.width / 60;
+  const card: Dimensions = {
+    width: margin * 6,
+    height: getCardHeight(margin * 6),
+  };
+
+  return {
+    canvas,
+    card,
+    margin,
+    inPlayStackY: 2 * margin + card.height,
+    deckX: 5 * card.width + 6 * margin,
+  };
+}
+
 const solitaireSketch = (p: p5) => {
   let solitaire: Solitaire;
+  let dim: GameDimensions;
 
   p.setup = () => {
-    p.createCanvas((CARD_WIDTH + MARGIN) * 7 + MARGIN, CARD_HEIGHT * 5);
+    dim = getGameDimensions();
+    p.createCanvas(dim.canvas.width, dim.canvas.height);
 
     solitaire = new Solitaire();
     solitaire.deal();
@@ -127,14 +181,14 @@ const solitaireSketch = (p: p5) => {
   p.draw = () => {
     p.background("darkgreen");
 
-    drawCompleteStacks(p, MARGIN, MARGIN, solitaire);
-    drawInPlayStacks(p, MARGIN, IN_PLAY_STACK_Y, solitaire);
-    drawDeck(p, DECK_X, MARGIN, solitaire);
+    drawCompleteStacks(p, dim, dim.margin, dim.margin, solitaire);
+    drawInPlayStacks(p, dim, dim.margin, dim.inPlayStackY, solitaire);
+    drawDeck(p, dim, dim.deckX, dim.margin, solitaire);
   };
 
   p.mouseClicked = () => {
-    const xIndex = Math.floor(p.mouseX / (CARD_WIDTH + MARGIN));
-    const yIndex = Math.floor(p.mouseY / (CARD_HEIGHT + MARGIN));
+    const xIndex = Math.floor(p.mouseX / (dim.card.width + dim.margin));
+    const yIndex = Math.floor(p.mouseY / (dim.card.height + dim.margin));
 
     // Top row?
     if (yIndex === 0) {
