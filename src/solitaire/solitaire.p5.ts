@@ -14,7 +14,13 @@ interface StackDraw {
   stagger: number;
 }
 
-function drawStack(p: p5, x: StackDraw, y: StackDraw, stack: CardStack) {
+function drawStack(
+  p: p5,
+  x: StackDraw,
+  y: StackDraw,
+  stack: CardStack,
+  faceUp: Set<number>
+) {
   if (stack.selected) {
     p.strokeWeight(5);
     p.stroke("gold");
@@ -38,6 +44,7 @@ function drawStack(p: p5, x: StackDraw, y: StackDraw, stack: CardStack) {
         x.value + i * x.stagger,
         y.value + i * y.stagger,
         card,
+        faceUp.has(card.key),
         CARD_WIDTH
       );
     });
@@ -53,11 +60,17 @@ const drawCompleteStacks = (
   p: p5,
   x: number,
   y: number,
-  { completeStacks }: Solitaire
+  { completeStacks, faceUp }: Solitaire
 ) => {
   let cX = x;
   for (const [_suit, stack] of completeStacks) {
-    drawStack(p, { value: cX, stagger: 0 }, { value: y, stagger: 0 }, stack);
+    drawStack(
+      p,
+      { value: cX, stagger: 0 },
+      { value: y, stagger: 0 },
+      stack,
+      faceUp
+    );
     cX += CARD_WIDTH + MARGIN;
   }
 };
@@ -66,14 +79,15 @@ const drawInPlayStacks = (
   p: p5,
   x: number,
   y: number,
-  { inPlayStacks }: Solitaire
+  { inPlayStacks, faceUp }: Solitaire
 ) => {
   for (const [i, stack] of inPlayStacks) {
     drawStack(
       p,
       { value: x + i * (CARD_WIDTH + MARGIN), stagger: 0 },
       { value: y, stagger: CARD_HEIGHT / 4 },
-      stack
+      stack,
+      faceUp
     );
   }
 };
@@ -82,14 +96,21 @@ const drawDeck = (
   p: p5,
   x: number,
   y: number,
-  { availableCards, seenCards }: Solitaire
+  { availableCards, seenCards, faceUp }: Solitaire
 ) => {
-  drawStack(p, { value: x, stagger: 0 }, { value: y, stagger: 0 }, seenCards);
+  drawStack(
+    p,
+    { value: x, stagger: 0 },
+    { value: y, stagger: 0 },
+    seenCards,
+    faceUp
+  );
   drawStack(
     p,
     { value: x + CARD_WIDTH + MARGIN, stagger: 0 },
     { value: y, stagger: 0 },
-    availableCards
+    availableCards,
+    faceUp
   );
 };
 

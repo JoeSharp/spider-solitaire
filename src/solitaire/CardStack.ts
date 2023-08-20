@@ -1,5 +1,6 @@
-import { suitColor } from "../cards/cards";
-import { ACE, Card, KING, Suit } from "../cards/types";
+import Card from "../cards/Card";
+import { createDeckOfCards, suitColor } from "../cards/cards";
+import { ACE, KING, Suit } from "../cards/types";
 
 type CardVerifier = (card: Card, lastCard: Card | undefined) => boolean;
 
@@ -16,6 +17,10 @@ export class CardStack {
     this.cards = [];
     this.selected = false;
     this.canPlaceCard = canPlaceCard;
+  }
+
+  fill(shuffleDeck: boolean = false) {
+    this.placeCards(createDeckOfCards(shuffleDeck));
   }
 
   select() {
@@ -44,25 +49,35 @@ export class CardStack {
     return true;
   }
 
+  extractCard(suit: Suit, value: number): Card | undefined {
+    const index = this.cards.findIndex(
+      (c) => c.suit === suit && c.value === value
+    );
+
+    if (index === -1) {
+      return undefined;
+    }
+
+    const result = this.cards.splice(index, 1);
+
+    return result[0];
+  }
+
   pop(): Card | undefined {
     return this.cards.pop();
   }
 
-  popFaceUp(): Card[] {
+  popThoseThatMatch(selector: (c: Card) => boolean): Card[] {
     const cards: Card[] = [];
 
-    while (this.cards.length > 0 && this.cards[this.cards.length - 1].faceUp) {
+    while (
+      this.cards.length > 0 &&
+      selector(this.cards[this.cards.length - 1])
+    ) {
       cards.push(this.cards.pop()!);
     }
 
     return cards;
-  }
-
-  turnOverTop() {
-    const topCard = this.peek();
-    if (!!topCard) {
-      topCard.faceUp = true;
-    }
   }
 
   peek(): Card | undefined {

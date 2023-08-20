@@ -1,3 +1,4 @@
+import Card from "../cards/Card";
 import { createDeckOfCards } from "../cards/cards";
 import { Suit } from "../cards/types";
 import {
@@ -26,11 +27,14 @@ class Solitaire {
   selectedStack: CardStack | undefined;
   selectedStackType: StackType;
 
+  faceUp: Set<number>;
+
   constructor() {
     this.availableCards = createSimpleStack();
     this.seenCards = createSimpleStack();
     this.selectedStack = undefined;
     this.selectedStackType = StackType.NONE;
+    this.faceUp = new Set();
 
     this.completeStacks = new Map();
     [Suit.Hearts, Suit.Diamonds, Suit.Spades, Suit.Clubs].forEach((suit) => {
@@ -60,7 +64,7 @@ class Solitaire {
         stack.placeCard(card, false);
       }
 
-      stack.turnOverTop();
+      this.turnOverTop(stack);
     }
 
     this.selectedStack = undefined;
@@ -81,7 +85,7 @@ class Solitaire {
           if (!!completedStack) {
             if (completedStack.placeCard(card)) {
               this.selectedStack.pop();
-              this.selectedStack.turnOverTop();
+              this.turnOverTop(this.selectedStack);
             }
           }
         }
@@ -99,7 +103,9 @@ class Solitaire {
         StackType.IN_PLAY === this.selectedStackType &&
         stackType === StackType.IN_PLAY
       ) {
-        const cards = this.selectedStack.popFaceUp().reverse();
+        const cards = this.selectedStack
+          .popThoseThatMatch((c) => this.isFaceUp(c))
+          .reverse();
 
         let placeFailed = false;
         for (let card of cards) {
@@ -111,7 +117,7 @@ class Solitaire {
         }
 
         if (!placeFailed) {
-          this.selectedStack.turnOverTop();
+          this.turnOverTop(this.selectedStack);
         }
       } else {
         // Pop the card from the selected stack
@@ -125,7 +131,7 @@ class Solitaire {
         }
 
         if (stack.placeCard(card)) {
-          this.selectedStack.turnOverTop();
+          this.turnOverTop(this.selectedStack);
         } else {
           // revert the change
           this.selectedStack.placeCard(card, false);
@@ -155,15 +161,35 @@ class Solitaire {
     this._clickStack(this.completeStacks.get(index), StackType.COMPLETED);
   }
 
+  turnOverTop(stack: CardStack) {
+    const card = stack.peek();
+
+    if (card === undefined) return;
+
+    this.faceUp.add(card.key);
+  }
+
+  isFaceUp(card: Card) {
+    return this.faceUp.has(card.key);
+  }
+
+  turnOverCard(card: Card) {
+    this.faceUp.add(card.key);
+  }
+
+  turnCardFaceDown(card: Card) {
+    this.faceUp.delete(card.key);
+  }
+
   takeNextCard() {
     let card = this.availableCards.pop();
     if (!!card) {
-      card.faceUp = true;
+      this.turnOverCard(card);
       this.seenCards.placeCard(card);
     } else {
       card = this.seenCards.pop();
       while (card !== undefined) {
-        card.faceUp = false;
+        this.turnCardFaceDown(card);
         this.availableCards.placeCard(card);
         card = this.seenCards.pop();
       }

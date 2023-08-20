@@ -1,5 +1,6 @@
 import { shuffle } from "lodash";
-import { ACE, Card, JACK, KING, QUEEN, Suit, SuitColor } from "./types";
+import { ACE, JACK, KING, QUEEN, Suit, SuitColor } from "./types";
+import Card from "./Card";
 
 export function suitText(suit: Suit) {
   switch (suit) {
@@ -66,11 +67,11 @@ export function isImageCard(value: number) {
 }
 
 export function createDeckOfCards(shuffleDeck: boolean = false): Card[] {
-  const cards = [];
+  const cards: Card[] = [];
 
   for (let suit = 0; suit <= 3; suit++) {
     for (let value = ACE; value <= KING; value++) {
-      cards.push({ suit, value, faceUp: false });
+      cards.push(new Card(suit, value));
     }
   }
 

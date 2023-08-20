@@ -10,12 +10,6 @@ export enum Suit {
   Clubs,
 }
 
-export interface Card {
-  suit: Suit;
-  value: number;
-  faceUp?: boolean;
-}
-
 export const ACE = 1;
 export const JACK = 11;
 export const QUEEN = 12;

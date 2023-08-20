@@ -1,6 +1,7 @@
 import * as p5 from "p5";
-import { ACE, Card, Suit } from "./types";
+import { ACE, Suit } from "./types";
 import { isImageCard, suitChar, valueText } from "./cards";
+import Card from "./Card";
 
 function getValueCoords(value: number, cWidth: number, cHeight: number) {
   switch (value) {
@@ -117,6 +118,7 @@ export function drawCard(
   x: number,
   y: number,
   card: Card,
+  faceUp: boolean,
   cWidth: number
 ) {
   const cHeight = getCardHeight(cWidth);
@@ -129,7 +131,7 @@ export function drawCard(
   s.fill("white");
   s.rect(0, 0, cWidth, cHeight);
 
-  if (card.faceUp) {
+  if (faceUp) {
     s.noStroke();
 
     s.fill(suitColour(s, card.suit));
