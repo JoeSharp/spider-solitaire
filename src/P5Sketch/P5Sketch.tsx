@@ -1,15 +1,26 @@
 import React from "react";
 import p5 from "p5";
-import solitaireSketch from "./solitaire/solitaire.p5";
 
-const App: React.FC = () => {
+export type Sketch = (p: p5) => void;
+
+interface Props {
+  sketch: Sketch;
+}
+
+/**
+ * Generic form of P5 Sketch container for react.
+ *
+ * @param Props containing the sketch definition
+ * @returns the component
+ */
+const P5SketchComponent: React.FC<Props> = ({ sketch }) => {
   const sketchInUse = React.useRef<p5>();
   const refContainer = React.useRef(null);
 
   React.useEffect(() => {
     if (!!refContainer) {
       sketchInUse.current = new p5(
-        solitaireSketch,
+        sketch,
         refContainer.current as unknown as HTMLElement
       );
     }
@@ -24,4 +35,4 @@ const App: React.FC = () => {
   return <div ref={refContainer} />;
 };
 
-export default App;
+export default P5SketchComponent;
